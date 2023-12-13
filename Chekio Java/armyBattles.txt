@@ -1,0 +1,113 @@
+package khnu.migfak.games;
+import java.util.ArrayDeque;
+import java.util.Queue;
+
+public class ArmyBattles {
+    static class Warrior {
+        int health = 50;
+        int attack = 5;
+
+        public boolean isAlive() {
+            return this.health <= 0;
+        }
+
+        public void attack(Warrior enemy) {
+            enemy.health -= this.attack;
+        }
+    }
+
+    static class Knight extends Warrior {
+        Knight() {
+            super();
+            this.attack = 7;
+        }
+    }
+
+    public static class Army {
+        private final Queue<Warrior> warriors = new ArrayDeque<>();
+
+        public void addUnits(int count, Class<? extends Warrior> type) {
+            for (int i = 0; i < count; i++) {
+                try {
+                    warriors.add(type.getDeclaredConstructor().newInstance());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public Warrior getNextWarrior() {
+            return warriors.poll();
+        }
+
+        public boolean hasLivingWarriors() {
+            return warriors.isEmpty();
+        }
+    }
+
+    static class Battle {
+        public static boolean fight(Army army1, Army army2) {
+            Warrior warrior1 = army1.getNextWarrior();
+            Warrior warrior2 = army2.getNextWarrior();
+
+            while (true) {
+                warrior1.attack(warrior2);
+                if (warrior2.isAlive()) {
+                    if (army2.hasLivingWarriors()) {
+                        return true;
+                    }
+                    warrior2 = army2.getNextWarrior();
+                }
+
+                warrior2.attack(warrior1);
+                if (warrior1.isAlive()) {
+                    if (army1.hasLivingWarriors()) {
+                        return false;
+                    }
+                    warrior1 = army1.getNextWarrior();
+                }
+            }
+        }
+    }
+
+    public static class Main {
+        public static void main(String[] args) {
+
+            Army army1 = new Army();
+            army1.addUnits(3, Warrior.class);
+            army1.addUnits(3, Knight.class);
+
+            Army army2 = new Army();
+            army2.addUnits(3, Warrior.class);
+            army2.addUnits(3, Knight.class);
+            System.out.println(Battle.fight(army1, army2)); // prints: true or false
+        }
+    }
+}
+
+package khnu.migfak.games;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class ArmyBattlesTest {
+
+
+
+    
+        @Test
+        public void testBattle() {
+            ArmyBattles.Army army1 = new ArmyBattles.Army();
+            army1.addUnits(3, ArmyBattles.Warrior.class);
+            army1.addUnits(3, ArmyBattles.Knight.class);
+
+            ArmyBattles.Army army2 = new ArmyBattles.Army();
+            army2.addUnits(3, ArmyBattles.Warrior.class);
+            army2.addUnits(3, ArmyBattles.Knight.class);
+
+            assertTrue(ArmyBattles.Battle.fight(army1, army2));
+        }
+
+
+}
+

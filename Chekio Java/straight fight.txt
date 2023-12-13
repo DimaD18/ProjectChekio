@@ -1,0 +1,166 @@
+package khnu.migfak.games;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class ArmyBattles {
+    static class Warrior {
+        int health = 50;
+        int attack = 5;
+
+        public boolean isAlive() {
+            return this.health > 0;
+        }
+
+        public void attack(Warrior enemy) {
+            int damage = this.attack;
+            if (enemy instanceof Defender) {
+                damage -= ((Defender) enemy).defense;
+            }
+            if (damage > 0) {
+                enemy.health -= damage;
+                if (this instanceof Vampire) {
+                    this.health += damage * ((Vampire) this).vampirism / 100;
+                    if (this.health > 40) {
+                        this.health = 40;
+                    }
+                }
+            }
+        }
+    }
+
+    static class Knight extends Warrior {
+        Knight() {
+            super();
+            this.attack = 7;
+        }
+    }
+
+    static class Defender extends Warrior {
+        int defense = 2;
+
+        Defender() {
+            super();
+            this.health = 60;
+            this.attack = 3;
+        }
+    }
+
+    static class Vampire extends Warrior {
+        int vampirism = 50;
+
+        Vampire() {
+            super();
+            this.health = 40;
+            this.attack = 4;
+        }
+    }
+
+    static class Lancer extends Warrior {
+        Lancer() {
+            super();
+            this.health = 50;
+            this.attack = 6;
+        }
+    }
+
+    static class Healer extends Warrior {
+        Healer() {
+            super();
+            this.health = 60;
+            this.attack = 0;
+        }
+
+        public void heal(Warrior ally) {
+            if (ally.health < 50) {
+                ally.health += 2;
+                if (ally.health > 50) {
+                    ally.health = 50;
+                }
+            }
+        }
+    }
+
+
+
+      public static class Army {
+        private final LinkedList<Warrior> warriors = new LinkedList<>();
+
+        public void addUnits(int count, Class<? extends Warrior> type) {
+            for (int i = 0; i < count; i++) {
+                try {
+                    warriors.add(type.getDeclaredConstructor().newInstance());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public Warrior getNextWarrior() {
+            return warriors.isEmpty() ? null : warriors.remove();
+        }
+
+        public boolean hasLivingWarriors() {
+            return !warriors.isEmpty();
+        }
+    }
+
+    static class Battle {
+        public static boolean straight_fight(Army army1, Army army2) {
+            while (true) {
+                int size = Math.max(army1.warriors.size(), army2.warriors.size());
+                for (int i = 0; i < size; i++) {
+                    if (i < army1.warriors.size() && i < army2.warriors.size()) {
+                        Warrior warrior1 = army1.warriors.get(i);
+                        Warrior warrior2 = army2.warriors.get(i);
+                        while (warrior1.isAlive() && warrior2.isAlive()) {
+                            warrior1.attack(warrior2);
+                            if (warrior2.isAlive()) {
+                                warrior2.attack(warrior1);
+                            }
+                        }
+                    } else if (i < army1.warriors.size()) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                army1.warriors.removeIf(warrior -> !warrior.isAlive());
+                army2.warriors.removeIf(warrior -> !warrior.isAlive());
+                if (army1.warriors.isEmpty()) {
+                    return false;
+                } else if (army2.warriors.isEmpty()) {
+                    return true;
+                }
+            }
+        }
+
+        public static boolean fight(Army army1, Army army2) {
+            boolean b = false;
+            boolean b1 = b;
+            return b1;
+        }
+    }
+    public static class Main {
+        public static void main(String[] args) {
+
+            ArmyBattles.Army army1 = new ArmyBattles.Army();
+            army1.addUnits(3, ArmyBattles.Warrior.class);
+            army1.addUnits(3, ArmyBattles.Knight.class);
+            army1.addUnits(3, ArmyBattles.Defender.class);
+            army1.addUnits(3, ArmyBattles.Vampire.class);
+            army1.addUnits(3, ArmyBattles.Lancer.class);
+            army1.addUnits(3, ArmyBattles.Healer.class);
+
+            ArmyBattles.Army army2 = new ArmyBattles.Army();
+            army2.addUnits(3, ArmyBattles.Warrior.class);
+            army2.addUnits(3, ArmyBattles.Knight.class);
+            army2.addUnits(3, ArmyBattles.Defender.class);
+            army2.addUnits(3, ArmyBattles.Vampire.class);
+            army2.addUnits(3, ArmyBattles.Lancer.class);
+            army2.addUnits(15, ArmyBattles.Healer.class);
+            System.out.println(ArmyBattles.Battle.fight(army1, army2)); // prints: true or false
+        }
+    }
+}
